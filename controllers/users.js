@@ -1,6 +1,7 @@
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-// To Reviewer: ошибки обрабатываются в app.js
+const { JWT_SECRET } = process.env;
 
 async function listUsers(req, res) {
   const users = await User.find({});
@@ -13,7 +14,9 @@ async function getUser(req, res) {
 }
 
 async function createUser(req, res) {
-  const user = new User(req.body);
+  const { password, ...data } = req.body;
+  const user = new User(data);
+  await user.setPassword(password);
   await user.save();
   res.send(user);
 }
@@ -35,6 +38,21 @@ async function updateAvatar(req, res) {
   res.send(user);
 }
 
+async function login(req, res) {
+  try {
+    const user = User.findOne({ email: req.body.email }).select('+passwordHash').orFail();
+    const matched = await user.comparePasswords(req.body.password);
+    if (!matched) {
+      throw new Error();
+    }
+    const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
+    res.cookie('token', token, { maxAge: 3600000 * 24 * 7, httpOnly: true, sameSite: true });
+    res.send({});
+  } catch {
+    res.status(401).send({ message: 'Логин и/или пароль не верны' });
+  }
+}
+
 module.exports = {
-  listUsers, getUser, createUser, updateUser, updateAvatar,
+  listUsers, getUser, createUser, updateUser, updateAvatar, login,
 };

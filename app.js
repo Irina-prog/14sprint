@@ -2,8 +2,15 @@ const path = require('path');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cookieParser = require('cookie-parser');
+const asyncHandler = require('express-async-handler');
+const helmet = require('helmet');
 const cards = require('./routes/cards');
 const users = require('./routes/users');
+const {
+  createUser, login,
+} = require('./controllers/users');
+const auth = require('./middlewares/auth');
 
 const { PORT = 3000, DATABASE_URL = 'mongodb://localhost/mestodb' } = process.env;
 
@@ -17,15 +24,13 @@ const notFoundHandler = (res) => res.status(404).send({ message: 'Запраши
 
 const app = express();
 app
+  .use(helmet)
   .use(bodyParser.json())
   .use(bodyParser.urlencoded({ extended: true }))
-  .use((req, res, next) => {
-    req.user = {
-      _id: '5f2c3ed595fca24390f93e8d',
-    };
-    next();
-  })
-  .use('/', cards, users)
+  .use(cookieParser())
+  .post('/signup', asyncHandler(createUser))
+  .post('/signin', asyncHandler(login))
+  .use('/', auth, cards, users)
   .use(express.static(path.join(__dirname, 'public')))
   .use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     if (err instanceof mongoose.Error.DocumentNotFoundError) {
