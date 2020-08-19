@@ -5,6 +5,9 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const asyncHandler = require('express-async-handler');
 const helmet = require('helmet');
+
+require('dotenv').config();
+
 const cards = require('./routes/cards');
 const users = require('./routes/users');
 const {
