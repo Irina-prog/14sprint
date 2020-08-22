@@ -9,7 +9,7 @@ async function listCards(req, res) {
 }
 
 async function deleteCard(req, res) {
-  await Card.deleteOne({ _id: req.params.id }).orFail();
+  await Card.deleteOne({ _id: req.params.id, owner: req.user._id }).orFail();
   res.send({});
 }
 

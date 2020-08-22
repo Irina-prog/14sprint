@@ -34,8 +34,14 @@ const userSchema = new mongoose.Schema({
   },
 });
 
+if (!userSchema.options.toJSON) userSchema.options.toJSON = {};
+userSchema.options.toJSON.transform = function transform(doc, ret) {
+  const { passwordHash, ...data } = ret;
+  return data;
+};
+
 userSchema.methods.setPassword = async function setPassword(password) {
-  this.passwordHash = await hash(password, 10);
+  this.passwordHash = await hash(password || '', 10);
 };
 
 userSchema.methods.comparePasswords = async function comparePasswords(password) {

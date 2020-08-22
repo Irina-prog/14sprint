@@ -27,14 +27,14 @@ const notFoundHandler = (res) => res.status(404).send({ message: 'Запраши
 
 const app = express();
 app
-  .use(helmet)
+  .use(helmet())
   .use(bodyParser.json())
   .use(bodyParser.urlencoded({ extended: true }))
   .use(cookieParser())
   .post('/signup', asyncHandler(createUser))
   .post('/signin', asyncHandler(login))
-  .use('/', auth, cards, users)
-  .use(express.static(path.join(__dirname, 'public')))
+  .use('/', auth, cards, users) // защищаем авторизацией все API-вызовы (кроме /signin и /signup)
+  .use(express.static(path.join(__dirname, 'public'))) // доступ к статическим файлам оставляем открытым, т.к. клиентские js-файлы каким-то образом должны попасть клиенту до аутентификации, чтобы иметь возмодность её выполнить
   .use((err, req, res, next) => { // eslint-disable-line no-unused-vars
     if (err instanceof mongoose.Error.DocumentNotFoundError) {
       notFoundHandler(res);

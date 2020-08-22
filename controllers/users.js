@@ -23,7 +23,7 @@ async function createUser(req, res) {
 
 async function updateUser(req, res) {
   const { name, about } = req.body;
-  const user = await User.findById(req.user._id).orFail();
+  const user = await User.findOne({ _id: req.user._id, owner: req.user._id }).orFail();
   user.name = name;
   user.about = about;
   await user.save();
@@ -32,7 +32,7 @@ async function updateUser(req, res) {
 
 async function updateAvatar(req, res) {
   const { avatar } = req.body;
-  const user = await User.findById(req.user._id).orFail();
+  const user = await User.findOne({ _id: req.user._id, owner: req.user._id }).orFail();
   user.avatar = avatar;
   await user.save();
   res.send(user);
@@ -40,7 +40,7 @@ async function updateAvatar(req, res) {
 
 async function login(req, res) {
   try {
-    const user = User.findOne({ email: req.body.email }).select('+passwordHash').orFail();
+    const user = await User.findOne({ email: req.body.email }).select('+passwordHash').orFail();
     const matched = await user.comparePasswords(req.body.password);
     if (!matched) {
       throw new Error();
