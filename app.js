@@ -27,7 +27,8 @@ const notFoundHandler = (res) => res.status(404).send({ message: 'Запраши
 
 const app = express();
 app
-  .use(helmet())
+  .use(helmet()) // для установки заголовков Content-Security-Policy,
+  // позволяют ограничить источники скрипторв и других ресурсов.
   .use(bodyParser.json())
   .use(bodyParser.urlencoded({ extended: true }))
   .use(cookieParser())

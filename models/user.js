@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema({
 
 if (!userSchema.options.toJSON) userSchema.options.toJSON = {};
 userSchema.options.toJSON.transform = function transform(doc, ret) {
+  // Извлекаем из передаваемых клиентской части данных информацию о пароле
   const { passwordHash, ...data } = ret;
   return data;
 };

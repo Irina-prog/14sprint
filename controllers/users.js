@@ -15,7 +15,8 @@ async function getUser(req, res) {
 
 async function createUser(req, res) {
   const { password, ...data } = req.body;
-  const user = new User(data);
+  const user = new User(data); // Модели mongoose умеют сами отфильтровывать "лишние" поля.
+  // Так если в req.body передать не объявленное поле, то оно не будет сохранено в БД
   await user.setPassword(password);
   await user.save();
   res.send(user);
