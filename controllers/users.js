@@ -22,17 +22,24 @@ async function createUser(req, res) {
 }
 
 async function updateUser(req, res) {
-  const { name, about } = req.body;
-  const user = await User.findOne({ _id: req.user._id, owner: req.user._id }).orFail();
-  user.name = name;
-  user.about = about;
+  const { name, about, password } = req.body;
+  const user = await User.findOne({ _id: req.user._id }).orFail();
+  if (name) {
+    user.name = name;
+  }
+  if (about) {
+    user.about = about;
+  }
+  if (password) {
+    await user.setPassword(password);
+  }
   await user.save();
   res.send(user);
 }
 
 async function updateAvatar(req, res) {
   const { avatar } = req.body;
-  const user = await User.findOne({ _id: req.user._id, owner: req.user._id }).orFail();
+  const user = await User.findOne({ _id: req.user._id }).orFail();
   user.avatar = avatar;
   await user.save();
   res.send(user);

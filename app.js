@@ -42,6 +42,7 @@ app
     }
 
     if (err instanceof mongoose.Error.ValidationError) {
+      console.trace(err); // eslint-disable-line no-console
       res.status(400).send({ message: 'Введены не все обязательные данные' });
       return;
     }
