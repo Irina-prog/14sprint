@@ -9,7 +9,13 @@ async function listCards(req, res) {
 }
 
 async function deleteCard(req, res) {
-  await Card.deleteOne({ _id: req.params.id }).orFail();
+  const card = await Card.findById(req.params.id, { owner: 1 }).orFail();
+  if (card.owner.toString() !== req.user._id) {
+    res.status(403).send({ message: 'Запрещено удалять карточку, созданную другим пользователем' });
+    return;
+  }
+
+  await card.remove();
   res.send({});
 }
 

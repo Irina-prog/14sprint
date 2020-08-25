@@ -1,7 +1,9 @@
 const mongoose = require('mongoose');
+const { hash, compare } = require('bcryptjs');
 require('mongoose-type-url');
+require('mongoose-type-email');
 
-const { Url } = mongoose.Schema.Types;
+const { Url, Email } = mongoose.Schema.Types;
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -20,6 +22,32 @@ const userSchema = new mongoose.Schema({
     type: Url,
     required: true,
   },
+  email: {
+    type: Email,
+    required: true,
+    unique: true,
+  },
+  passwordHash: {
+    type: String,
+    required: true,
+    select: false,
+  },
 });
+
+if (!userSchema.options.toJSON) userSchema.options.toJSON = {};
+userSchema.options.toJSON.transform = function transform(doc, ret) {
+  // Извлекаем из передаваемых клиентской части данных информацию о пароле
+  const { passwordHash, ...data } = ret;
+  return data;
+};
+
+userSchema.methods.setPassword = async function setPassword(password) {
+  this.passwordHash = await hash(password || '', 10);
+};
+
+userSchema.methods.comparePasswords = async function comparePasswords(password) {
+  const result = await compare(password, this.passwordHash);
+  return result;
+};
 
 module.exports = mongoose.model('user', userSchema);
